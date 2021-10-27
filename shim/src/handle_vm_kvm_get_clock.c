@@ -24,9 +24,18 @@
  * SOFTWARE.
  */
 
+#include <debug.h>
+#include <detect_hypervisor.h>
+#include <g_mut_hndl.h>
 #include <kvm_clock_data.h>
-#include <platform.h>
+#include <mv_constants.h>
+#include <mv_hypercall.h>
+#include <mv_rdl_t.h>
+#include <mv_reg_t.h>
 #include <mv_types.h>
+#include <platform.h>
+#include <shared_page_for_current_pp.h>
+#include <shim_vcpu_t.h>
 
 /**
  * <!-- description -->
@@ -37,11 +46,28 @@
  *   @return SHIM_SUCCESS on success, SHIM_FAILURE on failure.
  */
 NODISCARD int64_t
-handle_vm_kvm_get_clock(struct kvm_clock_data *const pmut_ioctl_args) NOEXCEPT
+handle_vm_kvm_get_clock(
+    const uint16_t vsid, struct kvm_clock_data *const pmut_ioctl_args) NOEXCEPT
 {
+    struct mv_rdl_t *pmut_mut_rdl;
+    platform_expects(MV_INVALID_HANDLE != g_mut_hndl);
     platform_expects(NULL != pmut_ioctl_args);
     
-    pmut_ioctl_args->clock = 0xDEADBEEF;
+    if (detect_hypervisor()) {
+        bferror("The shim is not running in a VM. Did you forget to start MicroV?");
+        return SHIM_FAILURE;
+    }
+
+    pmut_mut_rdl = (struct mv_rdl_t *)shared_page_for_current_pp();
+    platform_expects(NULL != pmut_mut_rdl);
+    uint64_t mut_clock;
+
+    if (mv_vs_op_clock_get(g_mut_hndl, vsid, &mut_clock)) {
+        bferror("mv_vs_op_reg_get_list failed");
+        return SHIM_FAILURE;
+    }
+
+    pmut_ioctl_args->clock = 0xfeedbeef;
     pmut_ioctl_args->flags = 0;
 
     return SHIM_SUCCESS;

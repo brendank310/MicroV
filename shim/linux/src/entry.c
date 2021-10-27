@@ -531,11 +531,11 @@ handle_vm_kvm_create_vcpu_failed:
 }
 
 static long
-dispatch_vm_kvm_get_clock(struct kvm_clock_data *const ioctl_args)
+dispatch_vm_kvm_get_clock(struct kvm_clock_data *const ioctl_args, struct shim_vm_t *const pmut_vm)
 {
     struct kvm_clock_data mut_args;
 
-    if (handle_vm_kvm_get_clock(&mut_args)) {
+    if (handle_vm_kvm_get_clock(pmut_vm->id, &mut_args)) {
         bferror("handle_vm_kvm_get_clock failed");
         return -EINVAL;
     }
@@ -800,7 +800,8 @@ dev_unlocked_ioctl_vm(
 
         case KVM_GET_CLOCK: {
             return dispatch_vm_kvm_get_clock(
-                (struct kvm_clock_data *)ioctl_args);
+                (struct kvm_clock_data *)ioctl_args,
+                pmut_mut_vm);
         }
 
         case KVM_GET_DEBUGREGS: {
