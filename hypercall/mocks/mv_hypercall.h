@@ -766,7 +766,7 @@ extern "C"
     /** @brief stores the return value for mv_vs_op_tsc_get_khz */
     extern mv_status_t g_mut_mv_vs_op_tsc_get_khz;
     /** @brief stores the return value for mv_vs_op_clock_get */
-    extern mv_status_t g_mut_mv_vs_op_clock_get;
+    // extern mv_status_t g_mut_mv_vs_op_clock_get;
     /** @brief stores the return value for mv_vs_op_clock_set */
     extern mv_status_t g_mut_mv_vs_op_clock_set;
     /** @brief stores the return value for mv_vs_op_cpuid_get */
@@ -1539,7 +1539,7 @@ extern "C"
 #endif
 
         *pmut_val = 0;
-        return g_mut_mv_vs_op_clock_get;
+        return 0;
     }
 
     /**
@@ -1569,7 +1569,7 @@ extern "C"
     platform_expects((int32_t)MV_INVALID_ID != (int32_t)vsid);
 #endif
 
-        return g_mut_mv_vs_op_clock_set;
+        return 0;
     }
 
     /**

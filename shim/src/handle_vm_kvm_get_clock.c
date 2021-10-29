@@ -34,7 +34,6 @@
 #include <mv_reg_t.h>
 #include <mv_types.h>
 #include <platform.h>
-#include <shared_page_for_current_pp.h>
 #include <shim_vcpu_t.h>
 
 /**
@@ -49,8 +48,8 @@ NODISCARD int64_t
 handle_vm_kvm_get_clock(
     const uint16_t vsid, struct kvm_clock_data *const pmut_ioctl_args) NOEXCEPT
 {
-    struct mv_rdl_t *pmut_mut_rdl;
-    platform_expects(MV_INVALID_HANDLE != g_mut_hndl);
+    uint64_t mut_clock;
+
     platform_expects(NULL != pmut_ioctl_args);
     
     if (detect_hypervisor()) {
@@ -58,17 +57,12 @@ handle_vm_kvm_get_clock(
         return SHIM_FAILURE;
     }
 
-    pmut_mut_rdl = (struct mv_rdl_t *)shared_page_for_current_pp();
-    platform_expects(NULL != pmut_mut_rdl);
-    uint64_t mut_clock;
-
     if (mv_vs_op_clock_get(g_mut_hndl, vsid, &mut_clock)) {
         bferror("mv_vs_op_reg_get_list failed");
         return SHIM_FAILURE;
     }
 
-    pmut_ioctl_args->clock = 0xfeedbeef;
-    pmut_ioctl_args->flags = 0;
+    pmut_ioctl_args->clock = mut_clock;
 
     return SHIM_SUCCESS;
 }

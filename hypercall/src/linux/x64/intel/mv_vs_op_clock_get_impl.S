@@ -38,8 +38,8 @@ mv_vs_op_clock_get_impl:
     mov r11, rsi
     mov r12, rdx
     vmcall
-    mov [rcx], r10
-
+    mov [rdx], r10
+	
     pop r12
 
     ret

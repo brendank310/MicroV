@@ -50,7 +50,7 @@ main() noexcept -> bsl::exit_code
     integration::ioctl_t mut_vcpu{bsl::to_i32(vcpufd)};
 
     shim::kvm_clock_data mut_clock_data;
-    integration::verify(mut_vm.write(shim::KVM_GET_CLOCK, &mut_clock_data).is_zero());
+    integration::verify(mut_vcpu.write(shim::KVM_GET_CLOCK, &mut_clock_data).is_zero());
 
     bsl::print() << " clock: " << bsl::hex(mut_clock_data.clock) << bsl::endl;
 

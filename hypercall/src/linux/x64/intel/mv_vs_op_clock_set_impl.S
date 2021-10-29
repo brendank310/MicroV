@@ -32,16 +32,13 @@
 mv_vs_op_clock_set_impl:
 
     push r12
-    push r13
 
     mov rax, 0x764D000000060030
     mov r10, rdi
     mov r11, rsi
     mov r12, rdx
-    mov r13, rcx
     vmcall
 
-    pop r13
     pop r12
 
     ret

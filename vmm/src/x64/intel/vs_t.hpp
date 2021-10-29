@@ -2093,7 +2093,7 @@ namespace microv
             bsl::expects(running_status_t::running != m_status);
             bsl::expects(mut_sys.bf_tls_ppid() == this->assigned_pp());
 
-            return m_clock;
+            return bsl::safe_u64{m_clock};
         }
 
         /// <!-- description -->
