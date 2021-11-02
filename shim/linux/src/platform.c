@@ -280,7 +280,7 @@ platform_memcpy(
  *   @return SHIM_SUCCESS on success, SHIM_FAILURE on failure.
  */
 NODISCARD int64_t
-platform_mlock(void *const pmut_ptr, uint64_t const num, uint64_t *os_info) NOEXCEPT
+platform_mlock(void *const pmut_ptr, uint64_t const num, uintptr_t *os_info) NOEXCEPT
 {
     struct page **pages = NULL;
     int rc = 0;
@@ -336,7 +336,7 @@ platform_mlock(void *const pmut_ptr, uint64_t const num, uint64_t *os_info) NOEX
  *   @return SHIM_SUCCESS on success, SHIM_FAILURE on failure.
  */
 NODISCARD int64_t
-platform_munlock(void *const pmut_ptr, uint64_t const num, uint64_t os_info) NOEXCEPT
+platform_munlock(void *const pmut_ptr, uint64_t const num, uintptr_t os_info) NOEXCEPT
 {
     struct page **pages = (struct page **)os_info;
     uint64_t page_count = (num/PAGE_SIZE);
