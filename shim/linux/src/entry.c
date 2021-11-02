@@ -339,6 +339,8 @@ dispatch_system_kvm_get_supported_cpuid(
         goto FAILED;
     }
 
+    platform_free(mut_args, sizeof(*mut_args));
+
     return 0;
 
 FAILED:
@@ -1018,6 +1020,7 @@ dispatch_vcpu_kvm_get_msrs(
     struct shim_vcpu_t const *const vcpu, struct kvm_msrs *const user_args)
 {
     struct kvm_msrs *mut_args;
+    uint32_t mut_nmsrs = 0;
     uint64_t const size = sizeof(mut_args);
 
     mut_args = platform_alloc(size);
@@ -1028,15 +1031,22 @@ dispatch_vcpu_kvm_get_msrs(
 
     if (handle_vcpu_kvm_get_msrs(vcpu, mut_args)) {
         bferror("handle_vcpu_kvm_get_msrs failed");
-        return -EINVAL;
+        mut_nmsrs = (uint32_t)-EINVAL;
+        goto OUT_FREE;
+    } else {
+        mut_nmsrs = mut_args->nmsrs;
     }
 
     if (platform_copy_to_user(user_args, mut_args, size)) {
         bferror("platform_copy_to_user failed");
-        return -EINVAL;
+        mut_nmsrs = (uint32_t)-EINVAL;
+        goto OUT_FREE;
     }
 
-    return (long)mut_args->nmsrs;
+OUT_FREE:
+    platform_free(mut_args, sizeof(*mut_args));
+
+    return (long)mut_nmsrs;
 }
 
 static long
@@ -1299,30 +1309,30 @@ dispatch_vcpu_kvm_set_msrs(
     if (NULL == user_args) {
         bferror("user_args are null");
         mut_nmsrs = -EINVAL;
-        goto CLEANUP;
+        goto OUT_FREE;
     }
 
     if (platform_copy_from_user(mut_args, user_args, size)) {
         bferror("platform_copy_from_user failed");
         mut_nmsrs = -EINVAL;
-        goto CLEANUP;
+        goto OUT_FREE;
     }
 
     if (0 == mut_args->nmsrs) {
         /* Nothing to do */
         mut_nmsrs = 0;
-        goto CLEANUP;
+        goto OUT_FREE;
     }
 
     if (handle_vcpu_kvm_set_msrs(vcpu, mut_args)) {
         bferror("handle_vcpu_kvm_set_msrs failed");
         mut_nmsrs = -EINVAL;
-        goto CLEANUP;
+        goto OUT_FREE;
     }
 
     mut_nmsrs = mut_args->nmsrs;
 
-CLEANUP:
+OUT_FREE:
     platform_free(mut_args, sizeof(*mut_args));
 
     return mut_nmsrs;
